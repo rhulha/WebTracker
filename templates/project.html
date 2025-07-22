@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project {{ project_id }} - WebTracker2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .project-id {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 18px;
+            letter-spacing: 2px;
+            margin: 10px 0;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            text-align: center;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .upload-area.dragover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-large {
+            padding: 15px 30px;
+            font-size: 18px;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+        .samples-list {
+            list-style: none;
+            padding: 0;
+        }
+        .sample-item {
+            background: #f8f9fa;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sample-info {
+            flex-grow: 1;
+        }
+        .sample-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .sample-meta {
+            color: #666;
+            font-size: 12px;
+        }
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: #007bff;
+            height: 20px;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        .error {
+            color: #dc3545;
+            margin: 10px 0;
+        }
+        .success {
+            color: #28a745;
+            margin: 10px 0;
+        }
+        .share-section {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .share-link {
+            background: white;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Music Project</h1>
+            <div class="project-id">{{ project_id }}</div>
+            <p>Share this ID with collaborators to work together!</p>
+        </div>
+
+        <div class="share-section">
+            <h3>🔗 Share Your Project</h3>
+            <p>Copy this link to share with others:</p>
+            <div class="share-link" id="shareLink">{{ request.url_root }}project/{{ project_id }}</div>
+            <button class="btn" onclick="copyShareLink()">📋 Copy Link</button>
+        </div>
+
+        <div class="section">
+            <h3>📁 Audio Samples</h3>
+            <div id="storageInfo">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="storageProgress">Loading...</div>
+                </div>
+                <small id="storageText">Calculating storage usage...</small>
+            </div>
+            
+            <div class="upload-area" id="uploadArea">
+                <p>📤 Drop audio files here or <button class="btn" onclick="document.getElementById('fileInput').click()">Choose Files</button></p>
+                <p><small>Supported formats: WAV, MP3, OGG, FLAC (Max 10MB total per project)</small></p>
+                <input type="file" id="fileInput" accept=".wav,.mp3,.ogg,.flac" multiple>
+            </div>
+            
+            <ul class="samples-list" id="samplesList">
+                <!-- Samples will be loaded here -->
+            </ul>
+        </div>
+
+        <div class="section">
+            <h3>🎹 Music Tracker</h3>
+            <p>Ready to make music? Open the tracker interface to start creating!</p>
+            <a href="/project/{{ project_id }}/tracker" class="btn btn-large btn-success">🎵 Open Tracker</a>
+        </div>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const projectId = '{{ project_id }}';
+        
+        // Load project info
+        async function loadProjectInfo() {
+            try {
+                const response = await fetch(`/api/project/${projectId}/info`);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStorageInfo(data.total_size, data.max_size);
+                    updateSamplesList(data.samples);
+                } else {
+                    throw new Error('Failed to load project info');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error loading project information', 'error');
+            }
+        }
+
+        function updateStorageInfo(usedBytes, maxBytes) {
+            const percentage = (usedBytes / maxBytes) * 100;
+            const usedMB = (usedBytes / 1024 / 1024).toFixed(2);
+            const maxMB = (maxBytes / 1024 / 1024).toFixed(0);
+            
+            const progressFill = document.getElementById('storageProgress');
+            const storageText = document.getElementById('storageText');
+            
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = Math.round(percentage) + '%';
+            storageText.textContent = `${usedMB} MB / ${maxMB} MB used`;
+            
+            if (percentage > 90) {
+                progressFill.style.backgroundColor = '#dc3545';
+            } else if (percentage > 70) {
+                progressFill.style.backgroundColor = '#ffc107';
+            } else {
+                progressFill.style.backgroundColor = '#007bff';
+            }
+        }
+
+        function updateSamplesList(samples) {
+            const samplesList = document.getElementById('samplesList');
+            samplesList.innerHTML = '';
+            
+            if (samples.length === 0) {
+                samplesList.innerHTML = '<li style="text-align: center; color: #666; padding: 20px;">No samples uploaded yet. Upload some audio files to get started!</li>';
+                return;
+            }
+            
+            samples.forEach(sample => {
+                const li = document.createElement('li');
+                li.className = 'sample-item';
+                
+                const sizeKB = (sample.size / 1024).toFixed(1);
+                const uploadDate = new Date(sample.uploaded).toLocaleString();
+                
+                li.innerHTML = `
+                    <div class="sample-info">
+                        <div class="sample-name">🎵 ${sample.filename}</div>
+                        <div class="sample-meta">${sizeKB} KB • Uploaded ${uploadDate}</div>
+                    </div>
+                    <button class="btn" onclick="playSample('${sample.filename}')">▶ Play</button>
+                `;
+                
+                samplesList.appendChild(li);
+            });
+        }
+
+        function playSample(filename) {
+            const audio = new Audio(`/api/project/${projectId}/samples/${filename}`);
+            audio.play().catch(e => console.log('Error playing audio:', e));
+        }
+
+        function showMessage(text, type = 'success') {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${type}">${text}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        function copyShareLink() {
+            const shareLink = document.getElementById('shareLink');
+            navigator.clipboard.writeText(shareLink.textContent).then(() => {
+                showMessage('Link copied to clipboard!');
+            }).catch(() => {
+                showMessage('Failed to copy link', 'error');
+            });
+        }
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            uploadFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            uploadFiles(e.target.files);
+        });
+
+        async function uploadFiles(files) {
+            for (let file of files) {
+                await uploadFile(file);
+            }
+            // Reload project info after uploads
+            loadProjectInfo();
+        }
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                showMessage(`Uploading ${file.name}...`, 'success');
+                
+                const response = await fetch(`/api/project/${projectId}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showMessage(`✅ ${file.name} uploaded successfully!`);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showMessage(`❌ Failed to upload ${file.name}: ${error.message}`, 'error');
+            }
+        }
+
+        // Load project info on page load
+        loadProjectInfo();
+    </script>
+</body>
+</html>

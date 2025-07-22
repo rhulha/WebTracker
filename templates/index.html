@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebTracker - Music Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .description {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .create-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .create-btn:hover {
+            background: #0056b3;
+        }
+        .create-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .project-input {
+            margin: 20px 0;
+        }
+        .project-input input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 200px;
+            margin: 0 10px;
+        }
+        .error {
+            color: #dc3545;
+            margin: 10px 0;
+        }
+        .loading {
+            color: #007bff;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 WebTracker</h1>
+        <div class="description">
+            <p>Create collaborative music projects with friends!</p>
+            <p>• No login required - just share the project link<br>
+            • Upload your own audio samples (up to 10MB per project)<br>
+            • Real-time music creation with an easy-to-use tracker interface<br>
+            • Work together on the same project simultaneously</p>
+        </div>
+        
+        <div>
+            <button id="createProjectBtn" class="create-btn">🎶 Start New Project</button>
+        </div>
+        
+        <div class="project-input">
+            <strong>Or join an existing project:</strong><br><br>
+            <input type="text" id="projectIdInput" placeholder="Enter project ID" maxlength="12">
+            <button id="joinProjectBtn" class="create-btn">Join Project</button>
+        </div>
+        
+        <div id="message"></div>
+    </div>
+
+    <script>
+        document.getElementById('createProjectBtn').addEventListener('click', async function() {
+            const btn = this;
+            const messageDiv = document.getElementById('message');
+            
+            btn.disabled = true;
+            btn.textContent = 'Creating Project...';
+            messageDiv.innerHTML = '<div class="loading">Creating your project...</div>';
+            
+            try {
+                const response = await fetch('/api/create-project', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    messageDiv.innerHTML = '<div class="loading">Redirecting to your project...</div>';
+                    
+                    // Redirect to the project page
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url;
+                    }, 1000);
+                } else {
+                    throw new Error('Failed to create project');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                messageDiv.innerHTML = '<div class="error">Error creating project. Please try again.</div>';
+                btn.disabled = false;
+                btn.textContent = '🎶 Start New Project';
+            }
+        });
+
+        document.getElementById('joinProjectBtn').addEventListener('click', function() {
+            const projectId = document.getElementById('projectIdInput').value.trim();
+            const messageDiv = document.getElementById('message');
+            
+            if (!projectId) {
+                messageDiv.innerHTML = '<div class="error">Please enter a project ID</div>';
+                return;
+            }
+            
+            if (projectId.length !== 12) {
+                messageDiv.innerHTML = '<div class="error">Project ID must be 12 characters long</div>';
+                return;
+            }
+            
+            // Navigate to the project
+            window.location.href = `/project/${projectId}`;
+        });
+
+        // Allow Enter key to join project
+        document.getElementById('projectIdInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('joinProjectBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>WebTracker - Music Creator</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='/static/main.css'>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src='/static/tracker.js'></script>
+</head>
+<body>
+    <div class="header">
+        <h1>🎵 WebTracker</h1>
+        <div class="project-info">
+            <span id="projectId">Loading project...</span>
+            <button id="backToProject" class="btn">← Back to Project</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="stopBtn">⏹ Stop</button>
+        <button id="startBtn">▶ Start</button>
+        <button id="resetBtn">🔄 Reset</button>
+        <button id="pauseBtn">⏸ Pause</button>
+        <button id="saveBtn">💾 Save</button>
+        <button id="loadBtn">📁 Load</button>
+        
+        <div class="bpm-control">
+            <label for="bpmInput">BPM:</label>
+            <input type="number" id="bpmInput" min="60" max="200" value="120" step="1">
+            <span id="bpmDisplay">120</span>
+        </div>
+    </div>
+    
+    <div id="loading">Loading samples and project data...</div>
+    <div id="error" style="color: red; display: none;"></div>
+
+    <table id="tracker">
+        <!-- Table will be generated dynamically by JavaScript -->
+    </table>
+    
+</body>
+</html>

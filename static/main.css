@@ -1,0 +1,301 @@
+/* WebTracker2 Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #1a1a1a;
+    color: #fff;
+    height: 100%;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #333;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    color: #4CAF50;
+}
+
+.project-info {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+#projectId {
+    background: #333;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 14px;
+    color: #ccc;
+}
+
+.controls {
+    text-align: center;
+    margin: 30px 0;
+    padding: 20px;
+    background: #2a2a2a;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* BPM Control styling */
+.bpm-control {
+    display: inline-block;
+    margin-left: 30px;
+    background: #333;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.bpm-control label {
+    color: #ccc;
+    margin-right: 10px;
+}
+
+#bpmInput {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #555;
+    border-radius: 3px;
+    background: #444;
+    color: #fff;
+    text-align: center;
+}
+
+#bpmDisplay {
+    margin-left: 10px;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+/* Button styling */
+.btn, button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    min-width: 80px;
+}
+
+.btn:hover, button:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.btn:disabled, button:disabled {
+    background: #555;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn:active, button:active {
+    transform: translateY(0);
+}
+
+#saveBtn {
+    background-color: #2196F3;
+    color: white;
+}
+
+#saveBtn:hover {
+    background-color: #1976D2;
+}
+
+#loadBtn {
+    background-color: #FF9800;
+    color: white;
+}
+
+#loadBtn:hover {
+    background-color: #F57C00;
+}
+
+#loading {
+    text-align: center;
+    padding: 40px;
+    color: #ccc;
+    font-size: 18px;
+}
+
+#error {
+    text-align: center;
+    padding: 20px;
+    background: #d32f2f;
+    border-radius: 5px;
+    margin: 20px 0;
+}
+
+/* Tracker Table Styles */
+#tracker {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #2a2a2a;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+#tracker td {
+    border: 1px solid #444;
+    text-align: center;
+    font-weight: bold;
+    min-width: 25px;
+    height: 35px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.step-header {
+    background: #333 !important;
+    color: #888;
+    font-size: 11px;
+    cursor: default !important;
+    font-weight: normal;
+    padding: 5px 2px;
+}
+
+.instrument-header {
+    background: #333 !important;
+    color: #888;
+    cursor: default !important;
+    font-weight: bold;
+    padding: 10px;
+    min-width: 120px;
+}
+
+.instrument-name, tr td:first-child {
+    background: #1e5e2b !important;
+    color: #fff;
+    cursor: default !important;
+    padding: 10px;
+    font-weight: bold;
+    text-align: left;
+    min-width: 120px;
+    height: 30px;
+}
+
+.step-cell, tr td:not(:first-child) {
+    background: #3a3a3a;
+    color: transparent;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.step-cell:hover, tr td:not(:first-child):hover {
+    background: #4a4a4a;
+    box-shadow: inset 0 0 10px rgba(76, 175, 80, 0.3);
+}
+
+.step-cell.active, .active {
+    background: #4CAF50 !important;
+    color: #fff;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.3);
+}
+
+.step-cell.active::after, .active::after {
+    content: "●";
+    font-size: 16px;
+    color: #fff;
+}
+
+.step-cell.current-step, .current-step {
+    border: 2px solid #FFC107 !important;
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.5) !important;
+}
+
+.step-cell.current-step.active, .current-step.active {
+    background: #66BB6A !important;
+}
+
+/* Beat grouping visual cues */
+#tracker td:nth-child(5n+1) {
+    border-left: 2px solid #666;
+}
+
+#tracker td:nth-child(17) {
+    border-left: 3px solid #888;
+}
+
+#tracker td:nth-child(33) {
+    border-left: 3px solid #888;
+}
+
+#tracker td:nth-child(49) {
+    border-left: 3px solid #888;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .project-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .controls {
+        padding: 15px;
+    }
+    
+    .btn, button {
+        padding: 8px 15px;
+        font-size: 12px;
+        margin: 3px;
+    }
+    
+    .bpm-control {
+        margin-left: 0;
+        margin-top: 10px;
+        display: block;
+    }
+    
+    #tracker td {
+        min-width: 20px;
+        height: 30px;
+        font-size: 12px;
+    }
+    
+    .instrument-name, tr td:first-child {
+        font-size: 12px;
+        padding: 8px;
+        min-width: 100px;
+    }
+}
